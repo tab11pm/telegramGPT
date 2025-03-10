@@ -1,23 +1,19 @@
-import { openai } from './openai.js';
-export const INITIAL_SESSION = {
-	messages: [],
-};
-export async function initCommand(ctx) {
-	ctx.session = INITIAL_SESSION;
-	await ctx.reply('Жду вашего голосового или текстового сообщения');
-}
-export async function processTextToChat(ctx, content) {
-	try {
-		// пушим сообщения пользователя в сессию (в контекст)
-		ctx.session.messages.push({ role: openai.roles.USER, content });
-		// пушим сообщения бота в сессию (в контекст)
-		const response = await openai.chat(ctx.session.messages);
-		ctx.session.messages.push({
-			role: openai.roles.ASSISTANT,
-			content: response.content,
+import { Configuration, OpenAIApi } from 'openai';
+import config from 'config';
+import { createReadStream } from 'fs';
+class OpenAI {
+	roles = {
+		ASSISTANT: 'assistant',
+		USER: 'user',
+		SYSTEM: 'system',
+	};
+	constructor(apiKey) {
+		const configuration = new Configuration({
+			apiKey,
 		});
-		await ctx.reply(response.content);
-	} catch (e) {
-		console.log('Error while proccesing text to gpt', e.message);
+		this.openai = new OpenAIApi(configuration);
 	}
+	async chat(messages) {}
+	async transcription(filepath) {}
 }
+export const openai = new OpenAI(config.get('OPENAI_KEY'));

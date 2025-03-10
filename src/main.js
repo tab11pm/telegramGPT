@@ -1,5 +1,12 @@
 // импортируем вместе с Telegraf пакет session
 import { Telegraf, session } from 'telegraf';
+import { ogg } from './ogg';
+import config from 'config';
+import { message } from 'telegraf/filters';
+import { code } from 'telegraf/format';
+import { openai } from './openai.js';
+import { removeFile } from './utils.js';
+import { initCommand, INITIAL_SESSION, processTextToChat } from './logic.js';
 
 // ======  https://platform.openai.com/account/api-keys
 const bot = new Telegraf(config.get('TELEGRAM_TOKEN'));
