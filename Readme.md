@@ -18,3 +18,71 @@
 }
 ```
 
+
+Для работы с API OpenAI в ./src/openai.js  описан базовый класс. В его конструкторе создан объект с конфигурациями, которые будут использоваться при отправке запросов на серверы OpenAI, и объект для подключения к API.
+
+```js
+import { Configuration, OpenAIApi } from 'openai'
+import config from 'config'
+import { createReadStream } from 'fs'
+class OpenAI {
+  roles = {
+    ASSISTANT: 'assistant',
+    USER: 'user',
+    SYSTEM: 'system',
+  }
+  constructor(apiKey) {
+    const configuration = new Configuration({
+      apiKey,
+    })
+    this.openai = new OpenAIApi(configuration)
+  }
+  async chat(messages) {
+    
+  }
+  async transcription(filepath) {
+		
+  }
+}
+export const openai = new OpenAI(config.get('OPENAI_KEY'))
+```
+
+/src/openai.js
+
+Здесь roles — формат ролей, который принимает сервер openai. assistant — сообщения из gpt-чата; user — пользовательские сообщения; system — контекст для чата (например, «ChatGPT, веди себя как программист с многолетним стажем»).
+
+Функция transcription отвечает за перевод mp3 в текстовые сообщения с помощью модели whisper-1. Притом она достаточно хорошо распознает русский язык. 
+
+```js
+async transcription(filepath) {
+  try {
+    const response = await this.openai.createTranscription(
+      createReadStream(filepath),
+      'whisper-1'
+    )
+    return response.data.text
+  } catch (e) {
+    console.log('Error while transcription', e.message)
+  }
+}
+```
+OpenAI.transcription()
+
+Функция chat отвечает за самое главное — общение с ChatGPT на базе модели gpt-3.5-turbo. Четвертую модель можно использовать только по предварительно одобренной заявке. 
+
+```js
+async chat(messages) {
+  try {
+    const response = await this.openai.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages,
+    })
+    return response.data.choices[0].message
+  } catch (e) {
+    console.log('Error while gpt chat', e.message)
+  }
+}
+```
+OpenAI.chat()
+
+Асинхронная функция chat принимает messages — массив объектов с сообщениями, ролями и именами отправителей. А после — возвращает данные из response, ответ ChatGPT. 
