@@ -1,1 +1,5 @@
-# telegramGPT
+# Telegram GPT
+
+```````js
+  npm i
+```````
